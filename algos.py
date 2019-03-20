@@ -1,5 +1,5 @@
 class Graph:
-    
+
     def __init__(self, n):
         self.adj = [[] for i in range(n)]
         self.n = n
@@ -28,7 +28,15 @@ class Graph:
         return str(self.adj) + "\n" + str(self.labels)
 
 
-def breadth_first_search(G, s, t):
+def dinic_breadth_first_search(G, s, t):
+    """ Performs a BFS in graph G, assigning to each node it's depth.
+        G: a Graph
+        s: the origin
+        t: the destination
+
+        Complexity: O(E)
+          In the worst case, we have to traverse all edges in the graph.
+    """
     G.init_labels()
     Q = [s]
     found = False
@@ -44,62 +52,32 @@ def breadth_first_search(G, s, t):
     return found
 
 
-def depth_first_search(G, s, t, f=None, path=[]):
-    path = path + [s]
-    if s == t:
-        if f:
-            f(path)
-    else:
-        for e in G[s]:
-            depth_first_search(G, e, t, f, path)
+def dinic_depth_first_search(G, s, t):
+    """ Finds a path from s to t by DFS. Reverses all the edges in the path and returns.
+        G: a Graph
+        s: the origin
+        t: the destination
 
-
-def depth_first_search_1(G, s, t, f=None, path=[]):
-    path = path + [s]
-    if s == t:
-        if f:
-            f(path)
-        for i in range(len(path)-1):
-            print("(",path[i], ",", path[i+1], ")")
-            G.remove_edge(path[i], path[i+1])
-            G.add_edge(path[i+1], path[i])
-        print(G)
-
-    else:
-        for e in filter(lambda x: G.get_label(x) > G.get_label(s), G[s]):
-            depth_first_search_1(G, e, t, f, path)
-
-
-def shortest_path(G, s, t):
-    """ G should be an adjacency list
-        s should be the index of the source
-        t should be the index of the sink
+        Complexity: O(V)
+          This alorithm takes as many iterations as the depth of the path from s to t.
+          This distance is at most the number of vertices in the graph.
     """
-    pi = [None] * len(G)
-
-    Q = [s]
-    finished = False
-    while Q:
-        for n in G[Q[0]]:
-            if pi[n] is None:
-                pi[n] = Q[0]
-                Q.append(n)
-            if n == t:
-                Q = []
-                finished = True
-                break
-        Q = Q[1:]
-
-    if not finished:
-        return False
-
-    path = []
-    n = t
-    while n != s:
-        path.append((pi[n], n))
-        n = pi[n]
-
-    return path
+    pi = [None] * G.n
+    S = [s]
+    while S:
+        v = S[-1]
+        S = S[:-1]
+        if v == t: #we have found the target
+            break
+        for u in G[v]:
+            if G.get_label(u) > G.get_label(v):
+                pi[u] = v
+                S.append(u)
+    v = t
+    while pi[v] is not None: #reconstruct the path taken and reverse it
+        G.remove_edge(pi[v], v)
+        G.add_edge(v, pi[v])
+        v = pi[v]
 
 
 def bipartite_max_flow_unweighted(G, s, t, m):
@@ -107,12 +85,24 @@ def bipartite_max_flow_unweighted(G, s, t, m):
         s should be the index of the source
         t should be the index of the sink
         m is the number of elements in the first set
+
+        Complexity: O(E*V^2)
+          Each DFS increases the flow by one unit. In the worst case, we will have to run one BFS for each DFS.
+          This happens at most |f*| times, corresponding to O(V) iterations.
+          In the end we get: O( #iterations * T_BFS * T_DFS) = O(V*E*V) = O(E*V^2)
+          In practice however, we will not need to run a BFS for each DFS, nor will each DFS run through all vertices.
     """
 
     pairing = [None] * m
 
-    while breadth_first_search(G, s, t):
-        depth_first_search_1(G, s, t, lambda x: print(x))
+    
+    while dinic_breadth_first_search(G, s, t):
+        while dinic_depth_first_search(G, s, t):
+            pass
+
+    for i, e in enumerate(G.adj[m+1:-1]): #reconstruct the pairing from the residual network
+        if 0 < e[0] <= m:
+            pairing[e[0]-1] = i+1
 
     return pairing
 
