@@ -147,7 +147,6 @@ def bipartite_max_flow_unweighted(G, s, t, m):
 
     pairing = [None] * m
 
-    
     while dinic_breadth_first_search(G, s, t):
         while dinic_depth_first_search(G, s, t):
             pass
@@ -159,34 +158,76 @@ def bipartite_max_flow_unweighted(G, s, t, m):
     return pairing
 
 
-def hungarian_method(G):
+def hungarian_method(G: WeightedGraph):
     """ G should be a WeightedGraph
         s should be the index of the source
         t should be the index of the sink
         m is the number of elements in the first set
     """
-    
-    def sat(adj):
-        pass
-        
 
-    print(G.adj)
-
+    # Step 1: Subtract row minima
     for i in range(G.n):
-        m = min(G.adj[i])
+        k = min(G.adj[i])
         for j in range(G.n):
-            G.adj[i][j] -= m
+            G.adj[i][j] -= k
 
-    sat(G.adj)
-
+    # Step 2: Subtract column minima
     for j in range(G.n):
-        m = 0
+        k = float("+inf")
         for i in range(G.n):
-            m = min(m, G.adj[i][j])
+            k = min(k, G.adj[i][j])
         for i in range(G.n):
-            G.adj[i][j] -= m
+            G.adj[i][j] -= k
 
-    print(G.adj)
+    while True:
+        # Step 3: Cover all zeros with a minimum number of lines
+        assigned_rows = [None] * G.n
+        crossed_columns = [False] * G.n
+
+        for i in range(G.n):
+            for j in range(G.n):
+                if G.adj[i][j] == 0 and not crossed_columns[j]:
+                    assigned_rows[i] = j
+                    crossed_columns[j] = True
+
+        marked_rows = [False] * G.n
+        marked_columns = [False] * G.n
+        pairing = [None] * G.n
+        for i, j in enumerate(assigned_rows):
+            if j:
+                pairing[i] = j+1
+
+        for i in range(G.n):
+            if not assigned_rows[i]:
+                marked_rows[i] = True
+                for j in range(G.n):
+                    if G.adj[i][j] == 0:
+                        marked_columns[j] = True
+                        pairing[i] = j+1
+                        for i2 in range(G.n):
+                            if assigned_rows[i2] == j:
+                                marked_rows[i2] = True
+                                pairing[i2] = j + 1
+
+        lines = marked_columns.count(True) + marked_rows.count(False)
+        if lines == G.n:
+            break
+
+        # Step 4: Create additional zeros
+        k = float("+inf")
+        for i in range(G.n):
+            for j in range(G.n):
+                if not marked_columns[j] and marked_rows[i]:
+                    k = min(k, G.adj[i][j])
+
+        for i in range(G.n):
+            for j in range(G.n):
+                if not marked_columns[i] and marked_rows[j]:
+                    G.adj[i][j] -= k
+                if marked_columns[i] and not marked_rows[j]:
+                    G.adj[i][j] += k
+
+    return pairing
 
 
 def show_pairing(pairing):
@@ -194,7 +235,7 @@ def show_pairing(pairing):
     for e in pairing:
         if e is not None:
             i += 1
-    print("Maximum matching", i)
+    print("Maximum matching", i) #todo weights
     for i, e in enumerate(pairing):
         if e is not None:
             print(i + 1, " => ", e)

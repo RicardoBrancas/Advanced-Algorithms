@@ -19,4 +19,4 @@ for line in data[1:]:
 #for i in range(1, n + 1):
 #    g.set_edge(m+i, m+n+1)
 
-hungarian_method(g)
+show_pairing(hungarian_method(g))
