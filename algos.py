@@ -28,6 +28,26 @@ class Graph:
         return str(self.adj) + "\n" + str(self.labels)
 
 
+class Edge():
+
+    def __init__(self, to, weight):
+        self.to = to
+        self.weight = weight
+
+
+class WeightedGraph:
+
+    def __init__(self, n):
+        self.adj = [[0 for j in range(n)] for i in range(n)]
+        self.n = n
+
+    def __getitem__(self, key):
+        return self.adj[key]
+
+    def set_edge(self, i, j, w):
+        self.adj[i][j] = -w
+
+
 def dinic_breadth_first_search(G, s, t):
     """ Performs a BFS in graph G, assigning to each node it's depth.
         G: a Graph
@@ -80,6 +100,38 @@ def dinic_depth_first_search(G, s, t):
         v = pi[v]
 
 
+def shortest_path(G, s, t):
+    """ G should be an adjacency list:
+        s should be the index of the source
+        t should be the index of the sink
+    """
+    pi = [None] * len(G)
+
+    Q = [s]
+    finished = False
+    while Q:
+        for n in G[Q[0]]:
+            if pi[n] is None:
+                pi[n] = Q[0]
+                Q.append(n)
+            if n == t:
+                Q = []
+                finished = True
+                break
+        Q = Q[1:]
+
+    if not finished:
+        return False
+
+    path = []
+    n = t
+    while n != s:
+        path.append((pi[n], n))
+        n = pi[n]
+
+    return path
+
+
 def bipartite_max_flow_unweighted(G, s, t, m):
     """ G should be an adjacency list
         s should be the index of the source
@@ -107,6 +159,42 @@ def bipartite_max_flow_unweighted(G, s, t, m):
     return pairing
 
 
+def hungarian_method(G):
+    """ G should be a WeightedGraph
+        s should be the index of the source
+        t should be the index of the sink
+        m is the number of elements in the first set
+    """
+    
+    def sat(adj):
+        pass
+        
+
+    print(G.adj)
+
+    for i in range(G.n):
+        m = min(G.adj[i])
+        for j in range(G.n):
+            G.adj[i][j] -= m
+
+    sat(G.adj)
+
+    for j in range(G.n):
+        m = 0
+        for i in range(G.n):
+            m = min(m, G.adj[i][j])
+        for i in range(G.n):
+            G.adj[i][j] -= m
+
+    print(G.adj)
+
+
 def show_pairing(pairing):
+    i = 0
+    for e in pairing:
+        if e is not None:
+            i += 1
+    print("Maximum matching", i)
     for i, e in enumerate(pairing):
-        print(i + 1, " => ", e)
+        if e is not None:
+            print(i + 1, " => ", e)
