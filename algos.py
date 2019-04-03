@@ -132,7 +132,7 @@ def shortest_path(G, s, t):
     return path
 
 
-def bipartite_max_flow_unweighted(G, s, t, m):
+def bipartite_max_flow_unweighted(G: Graph, s, t, m):
     """ G should be an adjacency list
         s should be the index of the source
         t should be the index of the sink
@@ -165,13 +165,21 @@ def hungarian_method(G: WeightedGraph):
         m is the number of elements in the first set
     """
 
-    # Step 1: Subtract row minima
+    m = float("+inf")
+    for row in G.adj:
+        m = min(m, min(row))
+
+    for i in range(G.n):
+        for j in range(G.n):
+            G.adj[i][j] -= m
+
+    # Step 1: Subtract row minima O(n^2)
     for i in range(G.n):
         k = min(G.adj[i])
         for j in range(G.n):
             G.adj[i][j] -= k
 
-    # Step 2: Subtract column minima
+    # Step 2: Subtract column minima O(n^2)
     for j in range(G.n):
         k = float("+inf")
         for i in range(G.n):
@@ -179,12 +187,15 @@ def hungarian_method(G: WeightedGraph):
         for i in range(G.n):
             G.adj[i][j] -= k
 
-    while True:
+    ghs = 0
+    while True: # HOW MANY TIMES??
+        ghs += 1
+        print(ghs)
         # Step 3: Cover all zeros with a minimum number of lines
         assigned_rows = [None] * G.n
         crossed_columns = [False] * G.n
 
-        for i in range(G.n):
+        for i in range(G.n): # O(n^2)
             for j in range(G.n):
                 if G.adj[i][j] == 0 and not crossed_columns[j]:
                     assigned_rows[i] = j
@@ -193,39 +204,58 @@ def hungarian_method(G: WeightedGraph):
         marked_rows = [False] * G.n
         marked_columns = [False] * G.n
         pairing = [None] * G.n
-        for i, j in enumerate(assigned_rows):
+        for i, j in enumerate(assigned_rows): # O(n)
             if j:
                 pairing[i] = j+1
 
-        for i in range(G.n):
+        for i in range(G.n): 
             if not assigned_rows[i]:
                 marked_rows[i] = True
+       
+        while True: # O(n^3)
+            for i in range(G.n): # O(n^2)
                 for j in range(G.n):
-                    if G.adj[i][j] == 0:
+                    if marked_rows[i] and G.adj[i][j] == 0 and not marked_columns[j]:
                         marked_columns[j] = True
-                        pairing[i] = j+1
-                        for i2 in range(G.n):
-                            if assigned_rows[i2] == j:
-                                marked_rows[i2] = True
-                                pairing[i2] = j + 1
+
+            for j in range(G.n): # O(n^2)
+                for i2 in range(G.n):
+                    if assigned_rows[i2] == j:
+                        marked_rows[i2] = True
+
+            cont = False
+            for i in range(G.n): # O(n^2)
+                for j in range(G.n):
+                    if marked_rows[i] and G.adj[i][j] == 0 and not marked_columns[j]:
+                        cont = True
+            if not cont:
+                break
+
 
         lines = marked_columns.count(True) + marked_rows.count(False)
+        #print(list(map(lambda b: not b, marked_rows)))
+        #print(marked_columns)
+        #print(G.adj)
+        #print(lines)
         if lines == G.n:
             break
 
         # Step 4: Create additional zeros
         k = float("+inf")
-        for i in range(G.n):
+        for i in range(G.n): # O(n^2)
             for j in range(G.n):
                 if not marked_columns[j] and marked_rows[i]:
                     k = min(k, G.adj[i][j])
 
-        for i in range(G.n):
+        for i in range(G.n): # O(n^2)
             for j in range(G.n):
-                if not marked_columns[i] and marked_rows[j]:
+                if not marked_columns[j] and marked_rows[i]:
                     G.adj[i][j] -= k
-                if marked_columns[i] and not marked_rows[j]:
+                if marked_columns[j] and not marked_rows[i]:
                     G.adj[i][j] += k
+
+        print(G.adj)
+        print()
 
     return pairing
 
