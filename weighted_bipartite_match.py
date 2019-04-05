@@ -17,4 +17,5 @@ def read_graph():
     return g
 
 
-show_pairing(hungarian_method(read_graph()))
+g = read_graph()
+show_pairing(g, hungarian_method(g))

@@ -39,6 +39,7 @@ class WeightedGraph:
 
     def __init__(self, n):
         self.adj = [[0 for j in range(n)] for i in range(n)]
+        self.orig = [[0 for j in range(n)] for i in range(n)]
         self.n = n
         self.nRange = range(n)
 
@@ -47,6 +48,7 @@ class WeightedGraph:
 
     def set_edge(self, i, j, w):
         self.adj[i][j] = -w
+        self.orig[i][j] = w
 
     def make_positive(self):
         m = float("+inf")
@@ -275,12 +277,13 @@ def create_new_zeros(G, marked_columns, marked_rows):
                 G.adj[i][j] += k
 
 
-def show_pairing(pairing):
+def show_pairing(G, pairing):
     i = 0
-    for e in pairing:
+    for k, e in enumerate(pairing):
         if e is not None:
-            i += 1
-    print("Maximum matching", i)  # todo weights
+            i += G.orig[k][e-1]
+
+    print("Maximum matching", i)
     for i, e in enumerate(pairing):
         if e is not None:
             print(i + 1, " => ", e)
