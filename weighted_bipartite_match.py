@@ -2,21 +2,19 @@
 import sys
 from algos import *
 
-data = sys.stdin.readlines()
+sys.stdin.reconfigure(encoding="ascii")
 
-m, n = map(int, data[0].split())
-g = WeightedGraph(max(m,n))
 
-assignment = [None] * m
+def read_graph():
+    m, n = map(int, sys.stdin.readline().split())
+    g = WeightedGraph(max(m, n))
 
-for line in data[1:]:
-    nodes = list(map(int, line.split()))
-    g.set_edge(nodes[0]-1, nodes[1]-1, nodes[2])
+    d = sys.stdin.readlines()
+    for line in d:
+        nodes = line.split()
+        g.set_edge(int(nodes[0]) - 1, int(nodes[1]) - 1, int(nodes[2]))
 
-#for i in range(1, m + 1):
-#    g.set_edge(0, i, )
+    return g
 
-#for i in range(1, n + 1):
-#    g.set_edge(m+i, m+n+1)
 
-show_pairing(hungarian_method(g))
+show_pairing(hungarian_method(read_graph()))
