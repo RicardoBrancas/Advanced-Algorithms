@@ -1,3 +1,6 @@
+from utils import *
+
+
 class Graph:
 
     def __init__(self, n):
@@ -35,30 +38,32 @@ class Edge():
         self.weight = weight
 
 
-class WeightedGraph:
+class WeightedAssignmentProblem:
 
     def __init__(self, n):
         self.adj = [[0 for j in range(n)] for i in range(n)]
         self.orig = [[0 for j in range(n)] for i in range(n)]
+        self.mask = [[0 for j in range(n)] for i in range(n)]
         self.n = n
-        self.nRange = range(n)
+        self.row_cover = [False] * n
+        self.column_cover = [False] * n
 
     def __getitem__(self, key):
         return self.adj[key]
 
     def set_edge(self, i, j, w):
-        self.adj[i][j] = -w
         self.orig[i][j] = w
+        self.adj[i][j] = w
 
     def make_positive(self):
-        m = float("+inf")
+        m = 0
         for row in self.adj:
-            m_row = min(row)
-            if m > m_row:
+            m_row = max(row)
+            if m < m_row:
                 m = m_row
         for i in range(self.n):
             for j in range(self.n):
-                self.adj[i][j] -= m
+                self.adj[i][j] = m - self.adj[i][j]
 
 
 def dinic_breadth_first_search(G, s, t):
@@ -113,38 +118,6 @@ def dinic_depth_first_search(G, s, t):
         v = pi[v]
 
 
-def shortest_path(G, s, t):
-    """ G should be an adjacency list:
-        s should be the index of the source
-        t should be the index of the sink
-    """
-    pi = [None] * len(G)
-
-    Q = [s]
-    finished = False
-    while Q:
-        for n in G[Q[0]]:
-            if pi[n] is None:
-                pi[n] = Q[0]
-                Q.append(n)
-            if n == t:
-                Q = []
-                finished = True
-                break
-        Q = Q[1:]
-
-    if not finished:
-        return False
-
-    path = []
-    n = t
-    while n != s:
-        path.append((pi[n], n))
-        n = pi[n]
-
-    return path
-
-
 def bipartite_max_flow_unweighted(G: Graph, s, t, m):
     """ G should be an adjacency list
         s should be the index of the source
@@ -171,117 +144,180 @@ def bipartite_max_flow_unweighted(G: Graph, s, t, m):
     return pairing
 
 
-def hungarian_method(G: WeightedGraph):
+def munkres_algorithm(problem: WeightedAssignmentProblem):
     """ G should be a WeightedGraph
         s should be the index of the source
         t should be the index of the sink
         m is the number of elements in the first set
     """
 
-    G.make_positive()
+    problem.make_positive()
 
-    subtract_row_minimum(G)  # O(n^2)
+    # step 1
+    for i in range(problem.n):
+        k = min(problem.adj[i])
+        for j in range(problem.n):
+            problem.adj[i][j] -= k
 
-    # This is actually much slower than subtract_row_minimum() because of
-    subtract_column_minimum(G)  # O(n^2)
+    # step 2
+    for r in range(problem.n):
+        for c in range(problem.n):
+            if problem.adj[r][c] == 0 and not problem.row_cover[r] and not problem.column_cover[c]:
+                problem.mask[r][c] = 1
+                problem.row_cover[r] = True
+                problem.column_cover[c] = True
 
-    ghs = 0
-    while True:  # HOW MANY TIMES??
-        ghs += 1
-        print(ghs)
+    problem.row_cover = [False] * problem.n
+    problem.column_cover = [False] * problem.n
 
-        marked_columns, marked_rows, pairing = cover_zeros(G)
-
-        lines = marked_columns.count(True) + marked_rows.count(False)
-
-        if lines == G.n:
+    step = 3
+    funcs = {3: step3, 4: step4, 5: step5, 6: step6}
+    while True:
+        step = funcs[step](problem)
+        if step == 7:
             break
 
-        # Step 4: Create additional zeros
-        create_new_zeros(G, marked_columns, marked_rows)
-
-        print(G.adj)
-        print()
-
+    pairing = [problem.mask[i].index(1) + 1 for i in range(problem.n)]
     return pairing
 
 
-def subtract_row_minimum(G):
-    for i in G.nRange:
-        k = min(G.adj[i])
-        for j in G.nRange:
-            G.adj[i][j] -= k
+def step3(g):
+    for i in range(g.n):
+        for j in range(g.n):
+            if g.mask[i][j] == 1:
+                g.column_cover[j] = True
+
+    column_count = 0
+    for j in range(g.n):
+        if g.column_cover[j]:
+            column_count += 1
+
+    if column_count >= g.n:
+        return 7
+    return 4
 
 
-def subtract_column_minimum(G):
-    for j in G.nRange:
-        k = float("+inf")
-        for i in G.nRange:
-            if k > G.adj[i][j]:
-                k = G.adj[i][j]
-        for i in G.nRange:
-            G.adj[i][j] -= k
+def step4(g):
+    def find_a_zero():
+        nonlocal row, col
+        r0 = max(row, 0)
+        c0 = max(col, 0)
+
+        row = -1
+        col = -1
+        for r in crange(r0, r0, g.n):
+            if not g.row_cover[r]:
+                for c in crange(c0, c0, g.n):
+                    if not g.column_cover[c] and g.adj[r][c] == 0:
+                        row = r
+                        col = c
+                        return
+            c0 = 0
+
+    def find_star_in_row(row):
+        for c in range(g.n):
+            if g.mask[row][c] == 1:
+                return c
+        return -1
+
+    row = -1
+    col = -1
+    while True:
+        find_a_zero()
+        if row == -1:
+            return 6
+        else:
+            g.mask[row][col] = 2
+            c = find_star_in_row(row)
+            if c != -1:
+                col = c
+                g.row_cover[row] = True
+                g.column_cover[col] = False
+            else:
+                g.path_row_0 = row
+                g.path_col_0 = col
+                return 5
 
 
-def cover_zeros(G):
-    assigned_rows = [None] * G.n
-    crossed_columns = [False] * G.n
-    
-    for i in G.nRange:  # O(n^2)
-        for j in G.nRange:
-            if G.adj[i][j] == 0 and not crossed_columns[j]:
-                assigned_rows[i] = j
-                crossed_columns[j] = True
+def step5(g: WeightedAssignmentProblem):
+    def find_star_in_col(c):
+        nonlocal r
+        r = -1
+        for i in range(g.n):
+            if g.mask[i][c] == 1:
+                r = i
 
-    marked_rows = [False] * G.n
-    marked_columns = [False] * G.n
-    pairing = [None] * G.n
-    for i, j in enumerate(assigned_rows):  # O(n)
-        if j:
-            pairing[i] = j + 1
-    for i in G.nRange:
-        if not assigned_rows[i]:
-            marked_rows[i] = True
-    while True:  # O(n^3)
-        for i in G.nRange:  # O(n^2)
-            for j in G.nRange:
-                if marked_rows[i] and G.adj[i][j] == 0 and not marked_columns[j]:
-                    marked_columns[j] = True
+    def find_prime_in_row(r):
+        nonlocal c
+        for j in range(g.n):
+            if g.mask[r][j] == 2:
+                c = j
 
-        for j in G.nRange:  # O(n^2)
-            for i2 in G.nRange:
-                if assigned_rows[i2] == j:
-                    marked_rows[i2] = True
+    def augment_path():
+        nonlocal path
+        for p in path:
+            if g.mask[p[0]][p[1]] == 1:
+                g.mask[p[0]][p[1]] = 0
+            else:
+                g.mask[p[0]][p[1]] = 1
 
-        cont = False
-        for i in G.nRange:  # O(n^2)
-            for j in G.nRange:
-                if marked_rows[i] and G.adj[i][j] == 0 and not marked_columns[j]:
-                    cont = True
-        if not cont:
-            break
-    return marked_columns, marked_rows, pairing
+    def clear_covers():
+        for r in range(g.n):
+            g.row_cover[r] = False
+        for c in range(g.n):
+            g.column_cover[c] = False
+
+    def erase_primes():
+        for r in range(g.n):
+            for c in range(g.n):
+                if g.mask[r][c] == 2:
+                    g.mask[r][c] = 0
+
+    r = -1
+    c = -1
+    path = [(g.path_row_0, g.path_col_0)]
+    done = False
+    while not done:
+        find_star_in_col(path[-1][1])
+        if r > -1:
+            path.append((r, path[-1][1]))
+        else:
+            done = True
+
+        if not done:
+            find_prime_in_row(path[-1][0])
+            path.append((path[-1][0], c))
+
+    augment_path()
+    clear_covers()
+    erase_primes()
+    return 3
 
 
-def create_new_zeros(G, marked_columns, marked_rows):
-    k = float("+inf")
-    for i in G.nRange:  # O(n^2)
-        for j in G.nRange:
-            if not marked_columns[j] and marked_rows[i]:
-                k = min(k, G.adj[i][j])
-    for i in G.nRange:  # O(n^2)
-        for j in G.nRange:
-            if not marked_columns[j] and marked_rows[i]:
-                G.adj[i][j] -= k
-            if marked_columns[j] and not marked_rows[i]:
-                G.adj[i][j] += k
+def step6(g: WeightedAssignmentProblem):
+    min_val = float("+inf")
+
+    for r in range(g.n):
+        if not g.row_cover[r]:
+            for c in range(g.n):
+                if not g.column_cover[c] and min_val > g.adj[r][c]:
+                    min_val = g.adj[r][c]
+
+    for r in range(g.n):
+        for c in range(g.n):
+            if g.row_cover[r]:
+                g.adj[r][c] += min_val
+            if not g.column_cover[c]:
+                g.adj[r][c] -= min_val
+
+    return 4
 
 
 def show_pairing(G, pairing):
     i = 0
     for k, e in enumerate(pairing):
         if e is not None:
-            i += G.orig[k][e-1]
+            i += G.orig[k][e - 1]
 
     print("Maximum matching", i)
     for i, e in enumerate(pairing):

@@ -7,7 +7,7 @@ sys.stdin.reconfigure(encoding="ascii")
 
 def read_graph():
     m, n = map(int, sys.stdin.readline().split())
-    g = WeightedGraph(max(m, n))
+    g = WeightedAssignmentProblem(max(m, n))
 
     d = sys.stdin.readlines()
     for line in d:
@@ -18,4 +18,4 @@ def read_graph():
 
 
 g = read_graph()
-show_pairing(g, hungarian_method(g))
+show_pairing(g, munkres_algorithm(g))
