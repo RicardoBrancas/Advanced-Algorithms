@@ -31,13 +31,6 @@ class Graph:
         return str(self.adj) + "\n" + str(self.labels)
 
 
-class Edge():
-
-    def __init__(self, to, weight):
-        self.to = to
-        self.weight = weight
-
-
 class WeightedAssignmentProblem:
 
     def __init__(self, n):
@@ -47,9 +40,6 @@ class WeightedAssignmentProblem:
         self.n = n
         self.row_cover = [False] * n
         self.column_cover = [False] * n
-
-    def __getitem__(self, key):
-        return self.adj[key]
 
     def set_edge(self, i, j, w):
         self.orig[i][j] = w
