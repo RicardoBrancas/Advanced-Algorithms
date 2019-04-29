@@ -1,11 +1,20 @@
-from typing import List, Set, Mapping
+from typing import List, Set, Mapping, Collection
 
 
-def shortest_path(G: Mapping[int, List[int]], S: Set[int], T: Set[int]) -> List[int]:
+def shortest_path(G: Mapping[int, List[int]], S: Collection[int], T: Collection[int]) -> List[int]:
     """ G should be an adjacency list:
         s should be the index of the source
         t should be the index of the sink
     """
+
+    s = len(G) - 2
+    t = len(G) - 1
+
+    for os in S:
+        G[s].append(os)
+    for ot in T:
+        G[t].append(ot)
+
     pi = [None] * len(G)
 
     Q = [s]
@@ -27,7 +36,7 @@ def shortest_path(G: Mapping[int, List[int]], S: Set[int], T: Set[int]) -> List[
     path = []
     n = t
     while n != s:
-        path.append((pi[n], n))
+        path.append(pi[n])
         n = pi[n]
 
     return path
