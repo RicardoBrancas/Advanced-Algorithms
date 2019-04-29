@@ -87,7 +87,7 @@ def dinic_depth_first_search(G, s, t):
         t: the destination
 
         Complexity: O(V)
-          This alorithm takes as many iterations as the depth of the path from s to t.
+          This algorithm takes as many iterations as the depth of the path from s to t.
           This distance is at most the number of vertices in the graph.
     """
     pi = [None] * G.n
@@ -308,6 +308,17 @@ def show_pairing(G, pairing):
     for k, e in enumerate(pairing):
         if e is not None:
             i += G.orig[k][e - 1]
+
+    print("Maximum matching", i)
+    for i, e in enumerate(pairing):
+        if e is not None:
+            print(i + 1, " => ", e)
+
+def unweighted_show_pairing(pairing):
+    i = 0
+    for k, e in enumerate(pairing):
+        if e is not None:
+            i += 1 
 
     print("Maximum matching", i)
     for i, e in enumerate(pairing):

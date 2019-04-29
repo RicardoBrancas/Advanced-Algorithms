@@ -19,4 +19,4 @@ for i in range(1, m + 1):
 for i in range(1, n + 1):
     g.add_edge(m+i, m+n+1)
 
-show_pairing(bipartite_max_flow_unweighted(g, 0, m+n+1, m))
+unweighted_show_pairing(bipartite_max_flow_unweighted(g, 0, m+n+1, m))
