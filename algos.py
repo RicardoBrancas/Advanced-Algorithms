@@ -1,3 +1,4 @@
+from typing import List
 from utils import *
 
 
@@ -29,6 +30,28 @@ class Graph:
 
     def __str__(self):
         return str(self.adj) + "\n" + str(self.labels)
+
+
+# class ColourfulGraph(Graph):
+#     def __init__(self, n):
+#         super().__init__(n)
+#         self.colours = {}
+#
+#     def add_edge(self, i, j, c):
+#         super().add_edge(i, j)
+#         self.colours[(i, j)] = c
+#         self.colours[(j, i)] = c
+#
+#     def remove_edge(self, i, j):
+#         super().remove_edge(i, j)
+#         del self.colours[(i, j)]
+#         del self.colours[(j, i)]
+#
+#     def get_color(self, i, j):
+#         return self.colours[(i, j)]
+#
+#     def __str__(self):
+#         return str(self.adj) + "\n" + str(self.colours)
 
 
 class WeightedAssignmentProblem:
@@ -301,6 +324,33 @@ def step6(g: WeightedAssignmentProblem):
                 g.adj[r][c] -= min_val
 
     return 4
+
+
+def mk_graph(V, E):
+    adj = [[] for i in V]
+    for e in E:
+        adj[e[0]].append(e[1])
+    return adj
+
+
+def is_acyclic(graph: List[List[int]]) -> bool:
+    starts = list(map(lambda l: graph.index(l), filter(lambda x: len(x) != 0, graph)))
+    while starts:
+        visited = []
+        stack = [starts[0]]
+        while stack:
+            v = stack[-1]
+            visited.append(v)
+            if v in starts:
+                starts.remove(v)
+            stack = stack[:-1]
+
+            for u in graph[v]:
+                if u in visited:
+                    return False
+                stack.append(u)
+
+    return True
 
 
 def show_pairing(G, pairing):
