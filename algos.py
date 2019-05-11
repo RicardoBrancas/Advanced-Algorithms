@@ -6,6 +6,7 @@ class Graph:
 
     def __init__(self, n):
         self.adj = [[] for i in range(n)]
+        self.labels = [None] * n
         self.n = n
         self.init_labels()
 
@@ -19,7 +20,8 @@ class Graph:
         self.adj[i].remove(j)
 
     def init_labels(self):
-        self.labels = [None] * self.n
+        for i in range(self.n):
+            self.labels[i] = None
         self.labels[0] = 0
 
     def get_label(self, n):
