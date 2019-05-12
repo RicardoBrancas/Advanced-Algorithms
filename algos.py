@@ -336,6 +336,8 @@ def mk_graph(V, E):
 
 
 def is_acyclic(graph: List[List[int]]) -> bool:
+    if graph == [[1], [2], [3], [0]]:
+        print("ERROERROERROERROERROERROERRO")
     starts = list(map(lambda l: graph.index(l), filter(lambda x: len(x) != 0, graph)))
     while starts:
         visited = []

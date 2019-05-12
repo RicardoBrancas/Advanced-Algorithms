@@ -4,35 +4,39 @@ from algos import *
 
 class PartitionMatroid(Matroid):
 
-    def __init__(self, vertices: List, partition: List, edges: List):
+    def __init__(self, vertices: List, partition: List, edges: List, both=True):
         self.vertices = vertices
         self.partition = partition
+        self.both = both
         super().__init__(set(edges))
 
     def reset(self):
         super().reset()
-        self.counters_from = {e: 0 for e in self.vertices}
+        if self.both:
+            self.counters_from = {e: 0 for e in self.vertices}
         self.counters_to = {e: 0 for e in self.vertices}
 
     def remove(self, elem) -> None:
         super().remove(elem)
-        self.counters_from[elem[0]] -= 1
+        if self.both:
+            self.counters_from[elem[0]] -= 1
         self.counters_to[elem[1]] -= 1
 
     def add(self, elem) -> None:
         super().add(elem)
-        self.counters_from[elem[0]] += 1
+        if self.both:
+            self.counters_from[elem[0]] += 1
         self.counters_to[elem[1]] += 1
 
     def is_independent_except_with(self, excp, elem) -> bool:
-        if excp[0] != elem[0] and elem[0] in self.partition and self.counters_from[elem[0]] + 1 >= 2:
+        if self.both and excp[0] != elem[0] and elem[0] in self.partition and self.counters_from[elem[0]] + 1 >= 2:
             return False
         if excp[1] != elem[1] and elem[1] in self.partition and self.counters_to[elem[1]] + 1 >= 2:
             return False
         return True
 
     def is_independent_with(self, elem) -> bool:
-        if elem[0] in self.partition and self.counters_from[elem[0]] + 1 >= 2:
+        if self.both and elem[0] in self.partition and self.counters_from[elem[0]] + 1 >= 2:
             return False
         if elem[1] in self.partition and self.counters_to[elem[1]] + 1 >= 2:
             return False
