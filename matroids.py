@@ -3,6 +3,10 @@ from algos import *
 
 
 class PartitionMatroid(Matroid):
+    """
+    Partition Matroid as described in the report.
+    The "both" flag allows for the slightly different delta functions.
+    """
 
     def __init__(self, vertices: List, partition: List, edges: List, both=True):
         self.vertices = vertices
@@ -44,6 +48,9 @@ class PartitionMatroid(Matroid):
 
 
 class GraphicMatroid(Matroid):
+    """
+    Graphic Matroid as described in the report.
+    """
 
     def __init__(self, vertices: List, edges: List):
         self.vertices = vertices

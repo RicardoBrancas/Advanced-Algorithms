@@ -2,6 +2,25 @@
 import sys
 from algos import *
 
+# Solves the unweighted bipartite matching problem
+# The input format is as follows:
+#   first line:       two numbers representing the number of elements in each partition
+#   every other line: a pair of numbers i,j from 1 to n/m representing a connection
+#                     between node i of the first partition and node j of the second
+#                     partition
+# Example:
+
+#5 5
+#1 1
+#1 2
+#1 3
+#1 4
+#2 2
+#3 5
+#4 1
+#5 1
+#5 5
+
 data = sys.stdin.readlines()
 
 m, n = map(int, data[0].split())

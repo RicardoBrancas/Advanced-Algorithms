@@ -3,6 +3,12 @@ from utils import *
 
 
 class Graph:
+    """
+    This class represents a graph, using an adjacency list as internal structure.
+    Vertices are assumed to be integers in the interval [0, n[.
+
+    The class also includes support for labelling vertices (as needed in Dinics' algorithm)
+    """
 
     def __init__(self, n):
         self.adj = [[] for i in range(n)]
@@ -34,29 +40,16 @@ class Graph:
         return str(self.adj) + "\n" + str(self.labels)
 
 
-# class ColourfulGraph(Graph):
-#     def __init__(self, n):
-#         super().__init__(n)
-#         self.colours = {}
-#
-#     def add_edge(self, i, j, c):
-#         super().add_edge(i, j)
-#         self.colours[(i, j)] = c
-#         self.colours[(j, i)] = c
-#
-#     def remove_edge(self, i, j):
-#         super().remove_edge(i, j)
-#         del self.colours[(i, j)]
-#         del self.colours[(j, i)]
-#
-#     def get_color(self, i, j):
-#         return self.colours[(i, j)]
-#
-#     def __str__(self):
-#         return str(self.adj) + "\n" + str(self.colours)
-
-
 class WeightedAssignmentProblem:
+    """
+    This class represents a weighted assignment problem and contains all
+    data structures needed by the Munkres algorithm.
+
+    Explanation of some fields:
+        adj:  is simply the adjacency matrix
+        orig: is the same as above, but doesn't get modified during execution
+        mask, row_cover and column_cover: internal data structures needed by the algorithm
+    """
 
     def __init__(self, n):
         self.adj = [[0 for j in range(n)] for i in range(n)]
@@ -71,6 +64,10 @@ class WeightedAssignmentProblem:
         self.adj[i][j] = w
 
     def make_positive(self):
+        """
+        This method turn the original (maximisation) problem into a minimisation problem.
+        """
+
         m = 0
         for row in self.adj:
             m_row = max(row)
@@ -83,6 +80,7 @@ class WeightedAssignmentProblem:
 
 def dinic_breadth_first_search(G, s, t):
     """ Performs a BFS in graph G, assigning to each node it's depth.
+
         G: a Graph
         s: the origin
         t: the destination
@@ -106,7 +104,9 @@ def dinic_breadth_first_search(G, s, t):
 
 
 def dinic_depth_first_search(G, s, t):
-    """ Finds a path from s to t by DFS. Reverses all the edges in the path and returns.
+    """ Finds a path from s to t by DFS, respecting the level graph.
+        Reverses all the edges in the path and returns.
+
         G: a Graph
         s: the origin
         t: the destination
@@ -134,7 +134,9 @@ def dinic_depth_first_search(G, s, t):
 
 
 def bipartite_max_flow_unweighted(G: Graph, s, t, m):
-    """ G should be an adjacency list
+    """ Dinic's/Dinitz' algorithm for max-flow from s to t in graph G
+
+        G should be an adjacency list
         s should be the index of the source
         t should be the index of the sink
         m is the number of elements in the first set

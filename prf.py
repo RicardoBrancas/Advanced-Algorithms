@@ -3,7 +3,10 @@ import subprocess
 from itertools import product
 from collections import OrderedDict
 
-iterations = 11
+# Profiling utility
+
+
+samples = 11
 jobs = 11
 
 
@@ -28,7 +31,7 @@ def profile(generator, output, executable, parameters, option_names):
         total_time = 0
         total_mem = 0
 
-        for i in range(0, iterations, jobs):
+        for i in range(0, samples, jobs):
             processes = []
             for j in range(0, jobs):
                 test_name = "/tmp/test_" + "-".join(map(str, param)) + "-" + str(i + j) + ".in"
@@ -69,23 +72,23 @@ def profile(generator, output, executable, parameters, option_names):
     result.close()
 
 
-#profile("./bm_gen.py",
-#        "bm.data",
-#        "./bipartite_match.py",
-#        {"p": [.1, .5, 1], "s": range(0, 501, 100)},
-#        {"p": "", "s": "--size"})
-#
-#profile("./wbm_gen.py",
-#        "wbm.data",
-#        "./weighted_bipartite_match.py",
-#        {"p": [.1, 0.5, 1], "s": range(0, 501, 100), "w": [100, 2000, 5000, 10000]},
-#        {"p": "", "s": "--size", "w": "--weight"})
+profile("./bm_gen.py",
+        "bm.data",
+        "./bipartite_match.py",
+        {"p": [.1, .5, 1], "s": range(0, 501, 100)},
+        {"p": "", "s": "--size"})
 
-#profile("./bm_gen.py",
-#        "mbm.data",
-#        "./matroid_bipartite_match.py",
-#        {"p": [.1, .5, 1], "s": range(0, 131, 20)},
-#        {"p": "", "s": "--size"})
+profile("./wbm_gen.py",
+        "wbm.data",
+        "./weighted_bipartite_match.py",
+        {"p": [.1, 0.5, 1], "s": range(0, 501, 100), "w": [100, 2000, 5000, 10000]},
+        {"p": "", "s": "--size", "w": "--weight"})
+
+profile("./bm_gen.py",
+        "mbm.data",
+        "./matroid_bipartite_match.py",
+        {"p": [.1, .5, 1], "s": range(0, 131, 20)},
+        {"p": "", "s": "--size"})
 
 profile("./arb_gen.py",
         "arb.data",
