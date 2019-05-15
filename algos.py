@@ -336,8 +336,6 @@ def mk_graph(V, E):
 
 
 def is_acyclic(graph: List[List[int]]) -> bool:
-    if graph == [[1], [2], [3], [0]]:
-        print("ERROERROERROERROERROERROERRO")
     starts = list(map(lambda l: graph.index(l), filter(lambda x: len(x) != 0, graph)))
     while starts:
         visited = []
@@ -365,8 +363,9 @@ def show_pairing(G, pairing):
 
     print("Maximum matching", i)
     for i, e in enumerate(pairing):
-        if e is not None:
+        if e is not None and G.orig[i][e-1]:
             print(i + 1, " => ", e)
+
 
 def unweighted_show_pairing(pairing):
     i = 0

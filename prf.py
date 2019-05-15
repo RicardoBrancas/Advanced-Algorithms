@@ -81,8 +81,14 @@ def profile(generator, output, executable, parameters, option_names):
 #        {"p": [.1, 0.5, 1], "s": range(0, 501, 100), "w": [100, 2000, 5000, 10000]},
 #        {"p": "", "s": "--size", "w": "--weight"})
 
-profile("./bm_gen.py",
-        "mbm.data",
-        "./matroid_bipartite_match.py",
-        {"p": [.1, .5, 1], "s": range(0, 131, 20)},
+#profile("./bm_gen.py",
+#        "mbm.data",
+#        "./matroid_bipartite_match.py",
+#        {"p": [.1, .5, 1], "s": range(0, 131, 20)},
+#        {"p": "", "s": "--size"})
+
+profile("./arb_gen.py",
+        "arb.data",
+        "./matroid_arborescence.py",
+        {"p": [.1, .5, 1], "s": range(0, 91, 15)},
         {"p": "", "s": "--size"})
