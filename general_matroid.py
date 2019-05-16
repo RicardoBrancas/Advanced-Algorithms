@@ -2,6 +2,14 @@ from typing import List, Set, MutableMapping, Collection, Any
 
 
 def shortest_path(G: MutableMapping[Any, List[Any]], S: Collection[Any], T: Collection[Any]) -> List[Any]:
+    """
+    Finds a shortest path between a set o starting vertices S
+    a set of sinks, T. It modifies the original graph by adding new vertices
+    and as such should not be called multiple times in the same graph.
+
+    The graph should be an adjacency matrix implemented as a dictionary.
+    """
+
     s = "_s"
     t = "_t"
 
@@ -42,6 +50,16 @@ def shortest_path(G: MutableMapping[Any, List[Any]], S: Collection[Any], T: Coll
 
 
 class Matroid:
+    """
+    General definition of a matroid.
+
+    Subclasses should implement the two oracle functions:
+      - is_independent_except_with
+      - is_independent_with
+
+    If needed subclasses can also override reset, remove and add,
+    but they should call the super method.
+    """
 
     def __init__(self, ground_set: Set):
         self.e = ground_set
@@ -50,11 +68,11 @@ class Matroid:
         E1 = self.I
         E2 = self.e - self.I
 
-        xy = set([(x, y) for x in E1 for y in E2 if self.is_independent_except_with(x, y)])
-        yx = set([(y, x) for y in E2 for x in E1 if other.is_independent_except_with(x, y)])
+        xy = [(x, y) for x in E1 for y in E2 if self.is_independent_except_with(x, y)]
+        yx = [(y, x) for y in E2 for x in E1 if other.is_independent_except_with(x, y)]
 
         adj = {}
-        for x, y in xy | yx:
+        for x, y in xy + yx:
             if x not in adj:
                 adj[x] = []
             adj[x].append(y)

@@ -11,8 +11,8 @@ parser.add_argument('--size', type=int, default=100)
 args = parser.parse_args()
 
 n = args.size
-print(str(n) + "\n0")
+print(str(n) + "\n0")  # for simplification, the root is always 0
 for n1 in range(n):
-    for n2 in range(1,n):
+    for n2 in range(1, n):
         if random.random() < args.p:
             print(n1, n2)

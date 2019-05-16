@@ -6,6 +6,8 @@ class PartitionMatroid(Matroid):
     """
     Partition Matroid as described in the report.
     The "both" flag allows for the slightly different delta functions.
+
+    Oracle calls: O(1)
     """
 
     def __init__(self, vertices: List, partition: List, edges: List, both=True):
@@ -50,6 +52,8 @@ class PartitionMatroid(Matroid):
 class GraphicMatroid(Matroid):
     """
     Graphic Matroid as described in the report.
+
+    Oracle call: O(len(vertices) + len(edges))
     """
 
     def __init__(self, vertices: List, edges: List):

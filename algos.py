@@ -162,21 +162,29 @@ def bipartite_max_flow_unweighted(G: Graph, s, t, m):
 
 
 def munkres_algorithm(problem: WeightedAssignmentProblem):
-    """ G should be a WeightedGraph
-        s should be the index of the source
-        t should be the index of the sink
-        m is the number of elements in the first set
+    """ The Munkres algorithm / Hungarian method is a augmenting path type algorithm.
+        It solves the minimisation weighted assignment problem.
+
+        It works by successively finding zeros in the matrix (which must be optimal)
+        and then relaxing the restrictions, creating new zeros.
+
+        When relaxing the restrictions it might be needed to undo previous assignments
+        which is why we need to use augmenting paths.
     """
 
     problem.make_positive()
 
+    # steps 1 and 2 are always done exactly once each at the beginning.
+
     # step 1
+    # for each row, find the smallest element and subtract from all other elements in the row
     for i in range(problem.n):
         k = min(problem.adj[i])
         for j in range(problem.n):
             problem.adj[i][j] -= k
 
     # step 2
+    # find zeros on the matrix and star them
     for r in range(problem.n):
         for c in range(problem.n):
             if problem.adj[r][c] == 0 and not problem.row_cover[r] and not problem.column_cover[c]:
@@ -198,7 +206,12 @@ def munkres_algorithm(problem: WeightedAssignmentProblem):
     return pairing
 
 
-def step3(g):
+def step3(g: WeightedAssignmentProblem):
+    """
+    Cover each column that contains a stared zero.
+    If all columns are covered, then the problem is solved.
+    """
+
     for i in range(g.n):
         for j in range(g.n):
             if g.mask[i][j] == 1:
@@ -214,8 +227,20 @@ def step3(g):
     return 4
 
 
-def step4(g):
+def step4(g: WeightedAssignmentProblem):
+    """
+    Find a non covered zero and prime it.
+    If there is already a starred zero in its row, then cover the column
+    and uncover the column containing the starred zero, repeat until there are
+    no uncovered zeros left.
+    """
+
     def find_a_zero():
+        """
+        Optimization: start searching from where we left off.
+        Greatly speeds up execution in large graphs.
+        """
+
         nonlocal row, col
         r0 = max(row, 0)
         c0 = max(col, 0)
@@ -257,6 +282,15 @@ def step4(g):
 
 
 def step5(g: WeightedAssignmentProblem):
+    """
+    This is the alternating path part of the algorithm.
+    The path consists of a series of alternating primed and starred zeros and terminates
+    at a primed zero that has no starred zero in its column.
+
+    Unstar each starred zero of the series, star each primed zero of the series,
+    erase all primes and uncover every line in the matrix.
+    """
+
     def find_star_in_col(c):
         nonlocal r
         r = -1
@@ -312,6 +346,10 @@ def step5(g: WeightedAssignmentProblem):
 
 
 def step6(g: WeightedAssignmentProblem):
+    """
+    Create new zeros
+    """
+
     min_val = float("+inf")
 
     for r in range(g.n):
@@ -331,6 +369,9 @@ def step6(g: WeightedAssignmentProblem):
 
 
 def mk_graph(V, E):
+    """
+    Create an adjacency matrix from a list of edges
+    """
     adj = [[] for i in V]
     for e in E:
         adj[e[0]].append(e[1])
@@ -338,6 +379,11 @@ def mk_graph(V, E):
 
 
 def is_acyclic(graph: List[List[int]]) -> bool:
+    """
+    Receives an adjacency matrix and checks if it is acyclic.
+    Works with disconnected graphs
+    """
+
     starts = list(map(lambda l: graph.index(l), filter(lambda x: len(x) != 0, graph)))
     while starts:
         visited = []
@@ -355,6 +401,8 @@ def is_acyclic(graph: List[List[int]]) -> bool:
                 stack.append(u)
 
     return True
+
+# Helper functions to print the final pairings
 
 
 def show_pairing(G, pairing):
