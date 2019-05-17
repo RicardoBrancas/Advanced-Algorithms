@@ -6,6 +6,7 @@
 - `algos.py`
 - `utils.py`
 - `general_matroid.py`
+- `matroids.py`
 - `perf.py`
 
 ### Solvers

@@ -77,9 +77,9 @@ Consider a bipartite graph $G = (W, J, E)$, where $V = W \cup J$. Let $W$ be cal
 \begin{figure}[ht]
     \centering
     \begin{tikzpicture}[
-        W/.style={circle, draw=blue!60, fill=blue!10, very thick, minimum size=5mm, font=\small},
-        J/.style={circle, draw=red!60, fill=red!10, very thick, minimum size=5mm, font=\small},
-        node distance=0.2cm and 3cm
+        W/.style={circle, draw=blue!60, fill=blue!10, very thick, minimum size=5mm, font=\footnotesize},
+        J/.style={circle, draw=red!60, fill=red!10, very thick, minimum size=5mm, font=\footnotesize},
+        node distance=0.05cm and 3cm
     ]
     \node[W]      (w1)                     {$W_1$};
     \node[W]      (w2)       [below=of w1] {$W_2$};
@@ -108,10 +108,10 @@ One way to solve this problem is to reduce it to the classical Max-Flow problem.
 \begin{figure}[ht]
     \centering
     \begin{tikzpicture}[
-        neutral/.style={circle, draw=black!60, fill=black!10, very thick, minimum size=5mm, font=\small},
-        W/.style={circle, draw=blue!60, fill=blue!10, very thick, minimum size=5mm, font=\small},
-        J/.style={circle, draw=red!60, fill=red!10, very thick, minimum size=5mm, font=\small},
-        node distance=0.2cm and 3cm
+        neutral/.style={circle, draw=black!60, fill=black!10, very thick, minimum size=5mm, font=\footnotesize},
+        W/.style={circle, draw=blue!60, fill=blue!10, very thick, minimum size=5mm, font=\footnotesize},
+        J/.style={circle, draw=red!60, fill=red!10, very thick, minimum size=5mm, font=\footnotesize},
+        node distance=0.05cm and 3cm
     ]
     
     \node[W]       (w1)                     {$W_1$};
@@ -151,9 +151,9 @@ This problem is the maximisation version of the Assignment Problem\cite{korte_co
 \begin{figure}[ht]
     \centering
     \begin{tikzpicture}[
-        W/.style={circle, draw=blue!60, fill=blue!10, very thick, minimum size=5mm, font=\small},
-        J/.style={circle, draw=red!60, fill=red!10, very thick, minimum size=5mm, font=\small},
-        node distance=0.5cm and 3cm
+        W/.style={circle, draw=blue!60, fill=blue!10, very thick, minimum size=5mm, font=\footnotesize},
+        J/.style={circle, draw=red!60, fill=red!10, very thick, minimum size=5mm, font=\footnotesize},
+        node distance=0.4cm and 3cm
     ]
     \node[W]      (w1)                     {$W_1$};
     \node[W]      (w2)       [below=of w1] {$W_2$};
@@ -218,8 +218,9 @@ A matroid $M$ is a pair $(E, \mathcal{F})$, where $E$ is a a set (called the gro
 Let $M_1 = (S, \mathcal{F}_1)$ and $M_2 = (S, \mathcal{F}_2)$ be two matroids, on the same ground set $S$.
 Then $\mathcal{F}_1 \cap \mathcal{F}_2$ corresponds to the common independent sets of both matroids, ie. their intersection.
 
-The algorithm for computing the intersection of 2 matroids, as defined by \textcite{schrijver_combinatorial_2013}, can be shown to run in $O(n^2 m (n + Q))$ time, where $n$ is the maximum size of a common independent set, $m$ is the size of the ground set, and $Q$ is the running time of the independence oracle \cite{schrijver_combinatorial_2013}.
-%TODO space usage
+The algorithm for computing the intersection of 2 matroids, as defined by \textcite{schrijver_combinatorial_2013}, can be shown to run in $O(n^2 m (n + Q))$ time (although better bounds have been found \cite{schrijver_combinatorial_2013}), where $n$ is the maximum size of a common independent set, $m$ is the size of the ground set, and $Q$ is the running time of the oracle \cite{schrijver_combinatorial_2013}. By analysing the algorithm we conclude that the spacial complexity is $O(m^2 + Q)$, where $Q$ is the spacial complexity of the oracle, resulting from constructing the bipartite graph $D_{M_1, M_2}(I)$.
+
+If there are weights associated with the elements of the ground set, then the algorithm can be modified so that the maximum weight independent set is found instead.
 
 \subsubsection{Bipartite Matching as a Matroid Problem}
 Consider again the problem of bipartite matching in a graph $G = (W, J, E)$, where $V = W \cup J$.
@@ -231,7 +232,7 @@ Let $\delta : V \mapsto 2^E$ represent the edges incident on a given vertex, $v 
     \item $\mathcal{F}_J = \{X \subseteq E: |X \cap \delta(v)| \le 1, \forall v \in J\}$
 \end{itemize}
 
-Then $M_W = (E, \mathcal{F}_W)$ and $M_J = (E, \mathcal{F}_J)$ are matroids \cite{goemans_handout_2011} (known as partition matroids). Furthermore, the largest cardinality element in the intersection corresponds to a maximum matching in G.
+Then $M_W = (E, \mathcal{F}_W)$ and $M_J = (E, \mathcal{F}_J)$ are matroids \cite{goemans_handout_2011} (known as partition matroids). Furthermore, the largest cardinality element in the intersection corresponds to a maximum matching in G. If instead of the maximum cardinality, the objective was to obtain the maximum weight matching, then it would simply be needed to find the maximum total weight independent set, instead of the largest set possible.
 
 The independence oracle for this matroid can be implemented in $O(1)$ time and $O(\left|V\right|)$ space, just by keeping a counter for each vertex representing the number of incident edges.
 
@@ -254,7 +255,7 @@ A simple way to check independence of a given set is to just check if the corres
 
 \section{Implementation Details}
 \subsection{Dinitz' Algorithm}
-As mentioned in section~\ref{dinic} when solving maximum cardinality bipartite matching the flow on a given edge is always either one or zero, and as such it is possible to avoid representing the flow and the residual capacity separably, as one can be derived from the other. Moreover, if we modify the original graph to represent the residual capacity, then the algorithm needs no extra memory.
+As mentioned in section~\ref{dinic} when solving maximum cardinality bipartite matching the flow on a given edge is always either one or zero, and as such it is possible to avoid representing the flow and the residual capacity. Moreover, if we modify the original graph to represent the residual capacity, then the algorithm needs no extra memory.
 
 \subsection{Munkres Algorithm}
 It is important to point out that we assumed our input graphs to be dense, which is why we chose the Munkres algorithm to solve this problem. If, however, the graphs were mostly sparse there would be two possible solutions:
@@ -269,7 +270,7 @@ The version of the Munkres algorithm we implemented is the one described by \tex
 \subsection{Matroid Intersection Algorithm}
 We created a generic \texttt{Matroid} class which includes the matroid intersection algorithm. Creating new kinds of matroids consists of creating subclasses and implementing the oracles.
 
-It is also worth to mention that our Matroid interface requires two functions for the oracle:
+It is also worth to mention that our Matroid interface requires two functions for the oracle, which allow for much faster oracle calls for some matroids:
 \begin{itemize}
     \setlength\itemsep{-.1em}
     \item \texttt{is\_independent\_with(e)}$: E \mapsto $ \texttt{bool}\\
@@ -277,7 +278,6 @@ It is also worth to mention that our Matroid interface requires two functions fo
     \item \texttt{is\_independent\_except\_with(e1, e2)}$: E \times E \mapsto $ \texttt{bool}\\
           This function checks if by removing element \texttt{e1} and adding \texttt{e2}, the current set is still independent.
 \end{itemize}
-This allows for much faster oracle calls for some matroids (like the partition matroid).
 
 \section{Experimental Analysis}
 In this section each data point corresponds to the average of 11 executions of different problems generated with the same parameters. We also present in red the regression of the execution time and memory usage plots with respect to the theoretical complexities (note: to simplify the computation of the regressions we assumed the worst case of $\left|E\right| = \left|V\right|^2$).
